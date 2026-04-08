@@ -1,0 +1,66 @@
+  @import "tailwindcss";
+
+  @theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui;
+    --font-poppins: 'Poppins', sans-serif;
+    --font-serif: 'Merriweather', Georgia, serif;
+  /* --- NEW SKINCARE COLORS --- */
+  /* #0C2C55 - Deep Oxford: Authority, Science, and Nighttime Repair */
+  /* --- LIGHT LUXE BOTANICAL --- */
+
+    /* Used for main Buttons and Headlines (High Contrast) */
+    --color-primary: #2D2424;
+
+    /* Used for Hover states and secondary links */
+    --color-secondary: #296374;
+
+    /* Used for soft section backgrounds (Replaced dark blue with soft mist) */
+    --color-accent: #E8F0F2;
+
+    /* Used for thin borders and dividers */
+    --color-mutedGreen: #BCCDD3;
+
+    /* Main Body Text color */
+    --color-darkGray: #2D2424;
+
+    /* MAIN PAGE BACKGROUND (The "Light" in Light Theme) */
+    --color-lightGray: #FDFDFB;
+
+    --color-danger: #D44444;
+  }
+
+/* --- Pellisco Premium Scrollbar Standards --- */
+
+/* 1. Chrome, Safari, and Edge */
+::-webkit-scrollbar {
+  width: 6px; /* Ultra-thin profile */
+  background-color: transparent; /* Seamless integration */
+}
+
+::-webkit-scrollbar-track {
+  background-color: #faf9f6; /* Matches your Pellisco Off-White background */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #1a1a1a; /* Dark, minimalist slate */
+  border-radius: 100px;
+  border: 2px solid #faf9f6; /* Creates a "floating" effect */
+  transition: background-color 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #6b705c; /* Subtle brand-color shift on interaction */
+}
+
+/* 2. Firefox Support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1a1a1a transparent;
+}
+
+/* 3. Smooth Scrolling for the entire app */
+html {
+  scroll-behavior: smooth;
+  /* Prevent horizontal scroll "shaking" on Windows */
+  overflow-x: hidden;
+}
