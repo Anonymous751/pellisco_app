@@ -23,6 +23,8 @@ import ResetPassword from "../features/auth/ResetPassword";
 import Login2FA from "../features/auth/Login2FA";
 import VerifyEmail from "../features/auth/verifyEmail";
 import SalonPartner from "../features/user/SalonPatners";
+import CheckoutPage from "../pages/products/Checkout";
+import OrdersPage from "../pages/products/OrderPage";
 
 const AppRoutes = () => {
   return (
@@ -38,6 +40,8 @@ const AppRoutes = () => {
 
       <Route path="/products" element={<AllProducts />} />
       <Route path="/product/:id" element={<ProductDetail />} />
+       <Route path="/checkout" element={<CheckoutPage />} />
+       <Route path="/orders" element={<OrdersPage />} />
       <Route path="/faqs" element={<FAQS />} />
 
       {/* --- Protected User Dashboard Section --- */}

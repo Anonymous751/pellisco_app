@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, memo } from "react";
+import { useState, useEffect, useCallback  } from "react";
 import {
   Search,
   User,
@@ -11,15 +11,15 @@ import {
   LogOut,
   LucideLayoutDashboard,
   Trash2,
-} from "lucide-react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  decrementQuantity,
-  incrementQuantity,
-  removeFromCart,
-} from "../features/cart/cartSlice";
-import Button from "../components/Button";
+  } from "lucide-react";
+  import { NavLink, useNavigate } from "react-router-dom";
+  import { useSelector, useDispatch } from "react-redux";
+  import {
+    decrementQuantity,
+    incrementQuantity,
+    removeFromCart,
+  } from "../features/cart/cartSlice";
+  import Button from "../components/Button";
 
 // 1. HOIST STATIC DATA: Move outside to prevent re-allocation on every render
 const NAV_LINKS = [
@@ -77,6 +77,7 @@ const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
 
   const cartItems = useSelector((state) => state.cart.cartItems);
 
@@ -328,6 +329,7 @@ const Header = () => {
 
            <Button
                 label="Secure Checkout"
+                onClick={() => navigate("/checkout")}
                 className="h-12 text-[10px] tracking-[0.3em] w-full"
                 disabled={true}
 />

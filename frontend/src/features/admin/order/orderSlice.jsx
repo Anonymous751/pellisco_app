@@ -1,39 +1,47 @@
-import { createSlice, createAsyncThunk, isAnyOf } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { createSlice, createAsyncThunk, isAnyOf } from "@reduxjs/toolkit";
+import axios from "axios";
 
-const BASE_URL = 'http://localhost:1551/api/v1';
+const BASE_URL = "http://localhost:1551/api/v1";
 
 // --- ADMIN THUNKS ---
 
 // 1. Fetch All Orders
 export const fetchAdminOrders = createAsyncThunk(
-  'orders/fetchAdminOrders',
+  "orders/fetchAdminOrders",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(`${BASE_URL}/admin/orders`, { withCredentials: true });
+      const { data } = await axios.get(`${BASE_URL}/admin/orders`, {
+        withCredentials: true,
+      });
       return data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Error fetching admin orders");
+      return rejectWithValue(
+        error.response?.data?.message || "Error fetching admin orders"
+      );
     }
   }
 );
 
 // 2. Fetch Stats
 export const fetchOrderStats = createAsyncThunk(
-  'orders/fetchOrderStats',
+  "orders/fetchOrderStats",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(`${BASE_URL}/admin/orders/stats`, { withCredentials: true });
+      const { data } = await axios.get(`${BASE_URL}/admin/orders/stats`, {
+        withCredentials: true,
+      });
       return data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Error fetching stats");
+      return rejectWithValue(
+        error.response?.data?.message || "Error fetching stats"
+      );
     }
   }
 );
 
 // 3. Update Order Status (Crucial for Dropdown)
 export const updateAdminOrder = createAsyncThunk(
-  'orders/updateAdminOrder',
+  "orders/updateAdminOrder",
   async ({ id, status }, { rejectWithValue }) => {
     try {
       // Matches your route: router.put("/admin/order/:id/status"...)
@@ -44,20 +52,45 @@ export const updateAdminOrder = createAsyncThunk(
       );
       return data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Failed to update status");
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to update status"
+      );
     }
   }
 );
 
 // --- USER THUNKS ---
 export const fetchMyOrders = createAsyncThunk(
-  'orders/fetchMy',
-  async ({ page = 1, keyword = '' }, { rejectWithValue }) => {
+  "orders/fetchMy",
+  async ({ page = 1, keyword = "" }, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(`${BASE_URL}/orders/me`, { params: { page, keyword }, withCredentials: true });
+      const { data } = await axios.get(`${BASE_URL}/orders/me`, {
+        params: { page, keyword },
+        withCredentials: true,
+      });
       return data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Failed to fetch user orders");
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch user orders"
+      );
+    }
+  }
+);
+
+export const createOrder = createAsyncThunk(
+  "orders/createOrder",
+  async (orderData, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.post(
+        `${BASE_URL}/new/order`, // match your route
+        orderData,
+        { withCredentials: true }
+      );
+      return data.order;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Order creation failed"
+      );
     }
   }
 );
@@ -81,12 +114,16 @@ const initialState = {
 };
 
 const orderSlice = createSlice({
-  name: 'orders',
+  name: "orders",
   initialState,
   reducers: {
-    clearErrors: (state) => { state.error = null; },
+    clearErrors: (state) => {
+      state.error = null;
+    },
     resetOrderState: () => initialState,
-    updateReset: (state) => { state.isUpdated = false; }
+    updateReset: (state) => {
+      state.isUpdated = false;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -117,7 +154,18 @@ const orderSlice = createSlice({
       // Handle Update Status Success
       .addCase(updateAdminOrder.fulfilled, (state, action) => {
         state.loading = false;
-        state.isUpdated = action.payload.success;
+
+        const updatedOrder = action.payload?.order;
+
+        if (!updatedOrder) return;
+
+        state.orders = state.orders.map((order) =>
+          order._id === updatedOrder._id ? updatedOrder : order
+        );
+      })
+      .addCase(createOrder.fulfilled, (state, action) => {
+        state.loading = false;
+        state.orders.unshift(action.payload); // add new order
       })
 
       // Shared Loading Matchers

@@ -76,31 +76,29 @@ const AOrder = () => {
   };
 
   const handleStatusUpdate = async (id, newStatus) => {
-    const resultAction = await dispatch(
-      updateAdminOrder({ id, status: newStatus })
-    );
-    if (updateAdminOrder.fulfilled.match(resultAction)) {
-      toast.success(
-        <div className="flex flex-col">
-          <span className="font-black text-[11px] tracking-widest">
-            STATUS UPDATED
-          </span>
-          <span className="text-[10px] opacity-90 uppercase">
-            Order #{id.slice(-4)} is {newStatus}
-          </span>
-        </div>,
-        {
-          icon: <RefreshCw size={16} className="text-secondary animate-spin" />,
-          style: {
-            borderRadius: "12px",
-            background: "#2D2424",
-            color: "#FDFDFB",
-            padding: "12px",
-          },
-        }
-      );
-    }
-  };
+  // ✅ 1. Optimistically update UI
+  const updatedOrders = orders.map((order) =>
+    order._id === id ? { ...order, orderStatus: newStatus } : order
+  );
+
+  // 🔥 TEMP update (IMPORTANT)
+  // you need an action in slice like: setOrders
+  dispatch({ type: "orders/setOrders", payload: updatedOrders });
+
+  // ✅ 2. Call API
+  const resultAction = await dispatch(
+    updateAdminOrder({ id, status: newStatus })
+  );
+
+  if (updateAdminOrder.fulfilled.match(resultAction)) {
+    toast.success(`Order updated to ${newStatus}`);
+  } else {
+    toast.error("Update failed");
+
+    // ❌ rollback if failed
+    dispatch(fetchAdminOrders());
+  }
+};
 
   const getStatusStyle = (status) => {
     switch (status) {
