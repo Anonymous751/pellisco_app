@@ -1,6 +1,12 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom'; // Added NavLink
-import { Instagram, Facebook, Twitter, Youtube, ArrowRight } from 'lucide-react';
+
+import { NavLink } from "react-router-dom"; // Added NavLink
+import {
+  Instagram,
+  Facebook,
+  Twitter,
+  Youtube,
+  ArrowRight,
+} from "lucide-react";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -14,8 +20,8 @@ const Footer = () => {
         { name: "Facial Kits", path: "/category/facial-kits" },
         { name: "Homecare", path: "/category/homecare" },
         { name: "Haircare", path: "/category/haircare" },
-        { name: "Best Sellers", path: "/best-sellers" }
-      ]
+        { name: "Best Sellers", path: "/best-sellers" },
+      ],
     },
     {
       title: "Support",
@@ -24,8 +30,8 @@ const Footer = () => {
         { name: "Return & Exchanges", path: "/return-exchange" },
         { name: "Track Order", path: "/track-order" },
         { name: "FAQs", path: "/faqs" },
-        { name: "Contact Us", path: "/contact-us" }
-      ]
+        { name: "Contact Us", path: "/contact-us" },
+      ],
     },
     {
       title: "Philosophy",
@@ -34,21 +40,22 @@ const Footer = () => {
         { name: "Science & Ingredients", path: "/science" },
         { name: "Sustainability", path: "/sustainability" },
         { name: "Clinical Studies", path: "/studies" },
-        { name: "Journal", path: "/journal" }
-      ]
-    }
+        { name: "Journal", path: "/journal" },
+      ],
+    },
   ];
 
   return (
     <footer
       className="pt-20 pb-10"
-      style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-lightGray)' }}
+      style={{
+        backgroundColor: "var(--color-primary)",
+        color: "var(--color-lightGray)",
+      }}
     >
       <div className="max-w-7xl mx-auto px-6">
-
         {/* --- MAIN FOUR SECTIONS --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-
           {/* 1. BRAND & NEWSLETTER */}
           <div className="flex flex-col gap-6">
             <h2 className="font-serif text-3xl tracking-tight text-white">
@@ -62,7 +69,7 @@ const Footer = () => {
                 type="email"
                 placeholder="Enter your email"
                 className="w-full bg-transparent border-b py-2 pr-10 text-sm font-poppins focus:outline-none transition-colors"
-                style={{ borderColor: 'var(--color-mutedGreen)' }}
+                style={{ borderColor: "var(--color-mutedGreen)" }}
               />
               <button className="absolute right-0 top-1/2 -translate-y-1/2 transition-transform group-hover:translate-x-1">
                 <ArrowRight size={18} />
@@ -83,7 +90,9 @@ const Footer = () => {
                       to={link.path}
                       className={({ isActive }) =>
                         `relative font-poppins text-sm transition-all duration-300 group w-fit block ${
-                          isActive ? "opacity-100 text-secondary" : "opacity-80 hover:opacity-100 text-white"
+                          isActive
+                            ? "opacity-100 text-secondary"
+                            : "opacity-80 hover:opacity-100 text-white"
                         }`
                       }
                     >
@@ -101,12 +110,11 @@ const Footer = () => {
         {/* --- DIVIDER --- */}
         <div
           className="h-[1px] w-full mb-8 opacity-20"
-          style={{ backgroundColor: 'var(--color-mutedGreen)' }}
+          style={{ backgroundColor: "var(--color-mutedGreen)" }}
         />
 
         {/* --- BOTTOM BAR --- */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-
           {/* SOCIAL MEDIA */}
           <div className="flex items-center gap-6">
             {[Instagram, Facebook, Twitter, Youtube].map((Icon, i) => (
@@ -124,10 +132,12 @@ const Footer = () => {
           <div className="flex flex-col items-center md:items-end gap-1 font-poppins text-[10px] tracking-widest uppercase opacity-60 text-white">
             <p>© {currentYear} Pellisco Skincare. All Rights Reserved.</p>
             <p>
-              Designed by <span className="text-white opacity-100 font-semibold uppercase">KaMaN PaNaG</span>
+              Designed by{" "}
+              <span className="text-white opacity-100 font-semibold uppercase">
+                KaMaN PaNaG
+              </span>
             </p>
           </div>
-
         </div>
       </div>
     </footer>

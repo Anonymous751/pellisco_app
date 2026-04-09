@@ -4,39 +4,23 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loadUser } from "../../features/auth/authSlice";
 import { createOrder } from "../../features/admin/order/orderSlice";
+import axios from "axios";
+
+const VALID_COUPONS = {
+  SAVE10: 10,
+  SAVE20: 20,
+};
 
 const CheckoutPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // =========================
-  // 🔥 REDUX STATE
-  // =========================
-  const { user, isAuthenticated, loading } = useSelector(
-    (state) => state.auth
-  );
+  const [loadingCoupon, setLoadingCoupon] = useState(false);
+
+  const { user, isAuthenticated, loading } = useSelector((state) => state.auth);
 
   const cartItems = useSelector((state) => state.cart.cartItems);
 
-  // =========================
-  // 🔥 LOAD USER (ONCE)
-  // =========================
-  useEffect(() => {
-    if (!user) dispatch(loadUser());
-  }, [dispatch, user]);
-
-  // =========================
-  // 🔐 AUTH GUARD
-  // =========================
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      navigate("/login");
-    }
-  }, [loading, isAuthenticated, navigate]);
-
-  // =========================
-  // 🧾 FORM STATE
-  // =========================
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -47,9 +31,19 @@ const CheckoutPage = () => {
     pincode: "",
   });
 
-  // =========================
-  // 🔥 PREFILL (SMART)
-  // =========================
+const [couponCode, setCouponCode] = useState(""); // input field
+const [appliedCoupon, setAppliedCoupon] = useState(null); // actual coupon object
+  const [discount, setDiscount] = useState(0);
+  const [couponApplied, setCouponApplied] = useState(false);
+
+  useEffect(() => {
+    if (!user) dispatch(loadUser());
+  }, [dispatch, user]);
+
+  useEffect(() => {
+    if (!loading && !isAuthenticated) navigate("/login");
+  }, [loading, isAuthenticated, navigate]);
+
   useEffect(() => {
     if (!user) return;
 
@@ -65,71 +59,88 @@ const CheckoutPage = () => {
     }));
   }, [user]);
 
-  // =========================
-  // 🛒 TOTAL (MEMOIZED)
-  // =========================
   const subtotal = useMemo(() => {
-    return cartItems.reduce(
+    return cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  }, [cartItems]);
+
+  const finalTotal = Math.max(0, subtotal - discount);
+
+  // APPLY COUPON
+const applyCoupon = async () => {
+  try {
+    const orderAmount = cartItems.reduce(
       (acc, item) => acc + item.price * item.quantity,
       0
     );
-  }, [cartItems]);
 
-  // =========================
-  // ❌ EMPTY CART
-  // =========================
-  if (!cartItems.length) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <p className="text-lg text-black/60">Your cart is empty</p>
-      </div>
+    const res = await axios.post(
+      "http://localhost:1551/api/v1/coupon/validate",
+      {
+        code: couponCode.trim().toUpperCase(),
+        orderAmount,
+        cartItems,
+      },
+      { withCredentials: true }
     );
-  }
 
-  // =========================
-  // ⏳ LOADING
-  // =========================
-  if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <p className="text-black/50">Preparing your checkout...</p>
-      </div>
-    );
-  }
+    console.log("RESPONSE:", res.data);
 
-  // =========================
-  // ✍️ INPUT HANDLER
-  // =========================
+    if (!res.data?.success) {
+      alert(res.data?.message || "Invalid coupon");
+      return;
+    }
+
+    // ✅ STORE CORRECTLY
+    setAppliedCoupon({
+      couponId: res.data.data.couponId,
+      code: res.data.data.code,
+    });
+
+    setDiscount(res.data.data.discountAmount);
+    setCouponApplied(true);
+
+  } catch (err) {
+    console.log("ERROR:", err.response?.data || err);
+    alert(err.response?.data?.message || "Something went wrong");
+  }
+};
+
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // =========================
-  // 🚀 CHECKOUT HANDLER (FIXED)
-  // =========================
   const handleCheckout = async () => {
-    const orderData = {
-      shippingInfo: {
-        fullName: formData.name,
-        phoneNo: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        postalCode: formData.pincode,
-      },
-      orderItems: cartItems.map((item) => ({
-        product: item._id,
-        name: item.name,
-        image: item.image,
-        price: item.price,
-        quantity: item.quantity,
-      })),
-      itemsPrice: subtotal,
-      totalPrice: subtotal,
-      paymentMethod: "COD",
-    };
+   const orderData = {
+  shippingInfo: {
+    fullName: formData.name,
+    phoneNo: formData.phone,
+    address: formData.address,
+    city: formData.city,
+    state: formData.state,
+    postalCode: formData.pincode,
+  },
 
-    console.log("✅ ORDER:", orderData);
+  orderItems: cartItems.map((item) => ({
+    product: item._id,
+    name: item.name,
+    image: item.image,
+    price: item.price,
+    quantity: item.quantity,
+  })),
+
+  paymentInfo: {
+    method: "COD",
+    status: "pending",
+  },
+
+  // ✅ ONLY send couponId + code
+  coupon: appliedCoupon
+  ? {
+      couponId: appliedCoupon.couponId,
+      code: appliedCoupon.code,
+    }
+  : null,
+};
 
     try {
       const res = await dispatch(createOrder(orderData));
@@ -137,142 +148,169 @@ const CheckoutPage = () => {
       if (res.meta.requestStatus === "fulfilled") {
         navigate("/orders");
       }
-    } catch (error) {
-      console.error("❌ Order Failed:", error);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  // =========================
-  // 🧩 UI
-  // =========================
+  if (!cartItems.length) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <p>Your cart is empty</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FAF9F6] px-6 py-20">
       <div className="max-w-6xl mx-auto">
-
         {/* HEADER */}
-        <div className="mb-16 text-center">
-          <h1 className="text-5xl font-serif italic text-primary mb-4">
-            Checkout Ritual
-          </h1>
-          <p className="text-xs tracking-[0.4em] uppercase text-black/30">
-            Secure • Encrypted • Trusted
-          </p>
+        <div className="text-center mb-16">
+          <h1 className="text-4xl font-serif italic">Checkout</h1>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-16">
-
-          {/* LEFT */}
+          {/* LEFT FORM */}
           <div className="lg:col-span-7">
             <div className="bg-white/70 backdrop-blur-xl p-10 rounded-[2.5rem] shadow-2xl">
-
-              <h2 className="text-xl font-serif mb-8">
-                Shipping Details
-              </h2>
+              <h2 className="mb-8 font-serif text-xl">Shipping Details</h2>
 
               <div className="grid gap-6">
-
-                {[
-                  { key: "name", label: "Full Name" },
-                  { key: "email", label: "Email Address" },
-                  { key: "phone", label: "Phone Number" },
-                ].map((field) => (
+                {["name", "email", "phone"].map((key) => (
                   <input
-                    key={field.key}
-                    value={formData[field.key]}
-                    onChange={(e) =>
-                      handleChange(field.key, e.target.value)
-                    }
-                    placeholder={field.label}
-                    className="border-b border-black/10 bg-transparent py-3 outline-none text-sm"
+                    key={key}
+                    value={formData[key]}
+                    onChange={(e) => handleChange(key, e.target.value)}
+                    placeholder={key.toUpperCase()}
+                    className="border-b py-3 bg-transparent outline-none"
                   />
                 ))}
 
                 <textarea
                   value={formData.address}
-                  onChange={(e) =>
-                    handleChange("address", e.target.value)
-                  }
-                  placeholder="Full Address"
-                  className="border-b border-black/10 bg-transparent py-3 outline-none text-sm"
+                  onChange={(e) => handleChange("address", e.target.value)}
+                  placeholder="Address"
+                  className="border-b py-3 bg-transparent outline-none"
                 />
 
                 <div className="grid grid-cols-2 gap-6">
                   <input
                     value={formData.city}
-                    onChange={(e) =>
-                      handleChange("city", e.target.value)
-                    }
+                    onChange={(e) => handleChange("city", e.target.value)}
                     placeholder="City"
-                    className="border-b border-black/10 py-3 outline-none text-sm"
+                    className="border-b py-3 outline-none"
                   />
                   <input
                     value={formData.state}
-                    onChange={(e) =>
-                      handleChange("state", e.target.value)
-                    }
+                    onChange={(e) => handleChange("state", e.target.value)}
                     placeholder="State"
-                    className="border-b border-black/10 py-3 outline-none text-sm"
+                    className="border-b py-3 outline-none"
                   />
                 </div>
 
                 <input
                   value={formData.pincode}
-                  onChange={(e) =>
-                    handleChange("pincode", e.target.value)
-                  }
+                  onChange={(e) => handleChange("pincode", e.target.value)}
                   placeholder="Pincode"
-                  className="border-b border-black/10 py-3 outline-none text-sm"
+                  className="border-b py-3 outline-none"
                 />
               </div>
             </div>
           </div>
 
-          {/* RIGHT */}
+          {/* RIGHT SUMMARY */}
           <div className="lg:col-span-5">
             <div className="sticky top-24 bg-white p-10 rounded-[2.5rem] shadow-2xl">
+              <h2 className="text-xl font-serif mb-8">Order Summary</h2>
 
-              <h2 className="text-xl font-serif mb-8">
-                Your Ritual
-              </h2>
-
-              <div className="space-y-6 mb-8">
+              {/* ITEMS */}
+              <div className="space-y-5 mb-6">
                 {cartItems.map((item) => (
-                  <div key={item._id} className="flex gap-6">
+                  <div key={item._id} className="flex gap-4">
                     <img
                       src={item.image}
-                      className="w-20 h-20 rounded-xl object-cover"
+                      className="w-16 h-16 rounded-xl object-cover"
                     />
-                    <div>
-                      <h4 className="text-sm font-medium">
-                        {item.name}
-                      </h4>
+                    <div className="flex-1">
+                      <p className="text-sm">{item.name}</p>
                       <p className="text-xs text-black/40">
                         Qty: {item.quantity}
                       </p>
-                      <p className="text-sm font-bold">
-                        ₹{item.price * item.quantity}
-                      </p>
                     </div>
+                    <p className="text-sm font-bold">
+                      ₹{item.price * item.quantity}
+                    </p>
                   </div>
                 ))}
               </div>
 
-              <div className="flex justify-between font-bold border-t pt-4">
-                <span>Total</span>
-                <span>₹{subtotal}</span>
+              {/* COUPON FIELD */}
+              <div className="mb-6">
+                {!couponApplied ? (
+                  <>
+                    <div className="flex gap-2">
+                      <input
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value)}
+                        placeholder="Enter coupon"
+                        className="flex-1 border-b py-2 outline-none"
+                      />
+                     <button
+  onClick={() => {
+    console.log("🔥 BUTTON CLICKED");
+    applyCoupon();
+  }}
+  className="px-4 py-2 text-xs border rounded-full"
+>
+  Apply
+</button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-xs text-green-600">
+                    Coupon applied: {appliedCoupon?.code} (-₹{discount})
+                  </div>
+                )}
               </div>
 
+              {/* TOTAL */}
+              <div className="space-y-2 border-t pt-4 text-sm">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>₹{subtotal}</span>
+                </div>
+
+                {discount > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Discount</span>
+                    <span>-₹{discount}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between font-bold text-lg pt-2">
+                  <span>Total</span>
+                  <span>₹{finalTotal}</span>
+                </div>
+              </div>
+
+              {/* BUTTON */}
               <button
                 onClick={handleCheckout}
-                className="group mt-10 w-full h-14 bg-primary text-white rounded-full flex items-center justify-center gap-3 text-xs uppercase tracking-widest"
+                className="group mt-8 w-full h-14 bg-black text-white rounded-full flex items-center justify-center gap-3 text-xs uppercase tracking-widest"
               >
-                Place Orders
+                Place Order
                 <ArrowRight className="group-hover:translate-x-1 transition" />
               </button>
-
             </div>
           </div>
-
         </div>
       </div>
     </div>

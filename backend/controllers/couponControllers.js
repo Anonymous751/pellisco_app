@@ -1,5 +1,5 @@
 
-import APIFunctionality from "../utils/apiFunctionality.js"; // Using your existing utility
+import APIFunctionality from "../utils/apiFunctionality.js"; 
 import HandleError from "../utils/handleError.js";
 
 import Coupon from "../models/couponModel.js";
@@ -24,66 +24,92 @@ export const createCoupon = handleAsyncError(async (req, res, next) => {
 export const validateCoupon = handleAsyncError(async (req, res, next) => {
   const { code, orderAmount, cartItems } = req.body;
 
-  // 1. Find coupon (Case-insensitive check)
+  // ✅ Input validation
+  if (!code || !orderAmount || !Array.isArray(cartItems)) {
+    return next(new HandleError("Invalid request data", 400));
+  }
+
+  // 1. Find coupon
   const coupon = await Coupon.findOne({
-    code: code.toUpperCase(),
-    isActive: true
+    code: code.trim().toUpperCase(),
+    isActive: true,
   });
 
   if (!coupon) {
     return next(new HandleError("Invalid or inactive coupon code", 404));
   }
 
-  // 2. TIME VALIDATION (Current Time vs Expiry Date)
-  if (new Date() > coupon.expiryDate) {
-    // Optional: Auto-disable if expired
+  // 2. Expiry check
+  if (!coupon.expiryDate || new Date() > new Date(coupon.expiryDate)) {
     coupon.isActive = false;
     await coupon.save();
     return next(new HandleError("This coupon has expired", 400));
   }
 
-  // 3. USAGE LIMIT VALIDATION
+  // 3. Usage limit check
   if (coupon.usedCount >= coupon.usageLimit) {
     return next(new HandleError("Coupon usage limit reached", 400));
   }
 
-  // 4. MINIMUM ORDER AMOUNT VALIDATION
-  if (orderAmount < coupon.minOrderAmount) {
-    return next(new HandleError(`Minimum order of ₹${coupon.minOrderAmount} required`, 400));
+  // 4. Minimum order check
+  if (Number(orderAmount) < coupon.minOrderAmount) {
+    return next(
+      new HandleError(
+        `Minimum order of ₹${coupon.minOrderAmount} required`,
+        400
+      )
+    );
   }
 
-  // 5. CATEGORY VALIDATION (Optional)
-  if (coupon.applicableCategories && coupon.applicableCategories.length > 0) {
-    const isApplicable = cartItems.some(item =>
-      coupon.applicableCategories.includes(item.mainCategory?.toLowerCase()) ||
-      coupon.applicableCategories.includes(item.category?.toLowerCase())
-    );
+  // 5. Category validation
+  if (coupon.applicableCategories?.length > 0) {
+    const normalize = (str) =>
+      String(str || "")
+        .toLowerCase()
+        .replace(/[-_\s]/g, "")
+        .trim();
+
+    const isApplicable = cartItems.some((item) => {
+      const itemCategory = normalize(item.mainCategory || item.category);
+
+      return coupon.applicableCategories.some(
+        (cat) => normalize(cat) === itemCategory
+      );
+    });
+
     if (!isApplicable) {
-      return next(new HandleError("Not applicable to items in your cart", 400));
+      return next(
+        new HandleError("Not applicable to items in your cart", 400)
+      );
     }
   }
 
-  // 6. CALCULATE DISCOUNT
+  // 6. Discount calculation
   let discountAmount = 0;
+
   if (coupon.discountType === "percentage") {
-    discountAmount = (orderAmount * coupon.discountAmount) / 100;
-    // Apply Max Discount Cap if it exists
-    if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
+    discountAmount = (Number(orderAmount) * coupon.discountAmount) / 100;
+
+    if (
+      coupon.maxDiscount &&
+      discountAmount > coupon.maxDiscount
+    ) {
       discountAmount = coupon.maxDiscount;
     }
   } else {
     discountAmount = coupon.discountAmount;
   }
 
-  res.status(200).json({
+  // 7. Final response
+  return res.status(200).json({
     success: true,
     message: "Coupon applied successfully",
     data: {
       couponId: coupon._id,
       code: coupon.code,
       discountAmount: Math.round(discountAmount),
-      discountType: coupon.discountType
-    }
+      discountType: coupon.discountType,
+    },
   });
 });
 

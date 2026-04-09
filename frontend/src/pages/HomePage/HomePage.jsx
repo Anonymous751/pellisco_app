@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import HeroSlider from './HeroSlider';
 import TestimonialSection from './TestimonialSection';
+import MarqueeLayer from './MarqueeLayer';
 
 const ShopByConcern = lazy(() => import('./ShopByConcern'));
 const Essentials = lazy(() => import('./Esstentials'));
@@ -41,6 +42,10 @@ const HomePage = () => {
       <section className="relative w-full min-h-[70vh] md:min-h-[85vh] overflow-hidden">
         <HeroSlider />
       </section>
+
+      <div className="relative z-20">
+  <MarqueeLayer />
+</div>
 
       {/* --- 2. LAZY LOADED COMPONENTS --- */}
       <Suspense fallback={<SectionLoader />}>

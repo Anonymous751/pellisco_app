@@ -4,6 +4,7 @@ import axios from "axios";
 // --- Helper Configuration ---
 const config = { headers: { "Content-Type": "application/json" } };
 
+
 // --- Async Thunks ---
 
 export const registerUser = createAsyncThunk(
@@ -83,10 +84,9 @@ export const loadUser = createAsyncThunk(
   "auth/loadUser",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(
-        `/api/v1/me`, // 👈 NO PORT HERE. Vite sends this to 1551 automatically.
-        { withCredentials: true }
-      );
+      const { data } = await axios.get("/api/v1/me", {
+        withCredentials: true,
+      });
       return data.user;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message);

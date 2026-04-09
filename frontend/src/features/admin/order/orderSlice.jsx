@@ -95,6 +95,16 @@ export const createOrder = createAsyncThunk(
   }
 );
 
+export const getSingleOrder = createAsyncThunk(
+  "order/getSingle",
+  async (id) => {
+    const { data } = await axios.get(`/api/v1/order/${id}`, {
+      withCredentials: true,
+    });
+    return data.order;
+  }
+);
+
 const initialState = {
   orders: [],
   totalOrders: 0,
@@ -163,10 +173,22 @@ const orderSlice = createSlice({
           order._id === updatedOrder._id ? updatedOrder : order
         );
       })
-      .addCase(createOrder.fulfilled, (state, action) => {
+        .addCase(createOrder.fulfilled, (state, action) => {
         state.loading = false;
-        state.orders.unshift(action.payload); // add new order
+        state.orders.unshift(action.payload.order); // ✅ FIXED
       })
+
+      .addCase(getSingleOrder.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getSingleOrder.fulfilled, (state, action) => {
+        state.loading = false;
+        state.order = action.payload;
+      })
+      .addCase(getSingleOrder.rejected, (state) => {
+        state.loading = false;
+      })
+
 
       // Shared Loading Matchers
       .addMatcher(

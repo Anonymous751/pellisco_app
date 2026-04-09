@@ -5,7 +5,7 @@ const Button = ({
   quantity,
   price,
   stock,
-  label = "Add to Cart" // ✅ default label
+  label = "Add to Cart", // ✅ default label
 }) => {
   const isOutOfStock = stock <= 0;
 
@@ -20,7 +20,6 @@ const Button = ({
 
       {/* Content */}
       <div className="relative z-10 flex items-center justify-center w-full h-full px-8">
-
         {/* ✅ USE LABEL HERE */}
         <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap">
           {isOutOfStock ? "Sold Out" : label}
@@ -33,7 +32,6 @@ const Button = ({
             className="group-hover:translate-x-1.5 transition-transform duration-300"
           />
         </div>
-
       </div>
     </button>
   );

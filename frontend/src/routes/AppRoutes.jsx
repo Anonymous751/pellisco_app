@@ -25,6 +25,7 @@ import VerifyEmail from "../features/auth/verifyEmail";
 import SalonPartner from "../features/user/SalonPatners";
 import CheckoutPage from "../pages/products/Checkout";
 import OrdersPage from "../pages/products/OrderPage";
+import OrderDetailsPage from "../pages/products/OrderDetailPage";
 
 const AppRoutes = () => {
   return (
@@ -40,8 +41,9 @@ const AppRoutes = () => {
 
       <Route path="/products" element={<AllProducts />} />
       <Route path="/product/:id" element={<ProductDetail />} />
-       <Route path="/checkout" element={<CheckoutPage />} />
-       <Route path="/orders" element={<OrdersPage />} />
+      <Route path="/checkout" element={<CheckoutPage />} />
+      <Route path="/orders" element={<OrdersPage />} />
+      <Route path="/order/:id" element={<OrderDetailsPage />} />
       <Route path="/faqs" element={<FAQS />} />
 
       {/* --- Protected User Dashboard Section --- */}

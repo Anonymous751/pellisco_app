@@ -6,6 +6,7 @@ import User from "../models/userModel.js";
 import { Session } from "../models/SessionModel.js";
 import redisClient from "../config/redis.js";
 import { createUserLog } from "../utils/createUserLog.js";
+import Coupon from "../models/couponModel.js";
 
 export const createNewOrder = handleAsyncError(async (req, res, next) => {
   const { shippingInfo, orderItems, paymentInfo, coupon } = req.body;
@@ -124,10 +125,35 @@ export const createNewOrder = handleAsyncError(async (req, res, next) => {
     });
   }
 
-  // 💰 CALCULATIONS
   const taxPrice = Number((itemsPrice * 0.05).toFixed(2));
   const shippingPrice = itemsPrice > 1000 ? 0 : 50;
-  const discountPrice = coupon?.discountAmount || 0;
+
+  // ✅ FIX STARTS HERE
+  let discountPrice = 0;
+
+  if (coupon?.couponId) {
+    const validCoupon = await Coupon.findById(coupon.couponId);
+
+    if (validCoupon && validCoupon.isActive) {
+      if (validCoupon.discountType === "percentage") {
+        discountPrice = (itemsPrice * validCoupon.discountAmount) / 100;
+
+        if (
+          validCoupon.maxDiscount &&
+          discountPrice > validCoupon.maxDiscount
+        ) {
+          discountPrice = validCoupon.maxDiscount;
+        }
+      } else {
+        discountPrice = validCoupon.discountAmount;
+      }
+
+      // 🔢 Increase usage
+      validCoupon.usedCount += 1;
+      await validCoupon.save();
+    }
+  }
+  // ✅ FIX ENDS HERE
 
   const totalPrice = itemsPrice + taxPrice + shippingPrice - discountPrice;
   const isPaid = paymentInfo?.status === "paid";
@@ -235,10 +261,10 @@ export const createNewOrder = handleAsyncError(async (req, res, next) => {
   // ⚡ CACHE INVALIDATION
   await redisClient.del("admin_all_orders_*");
   await redisClient.del("analytics_stats");
-const keys = await redisClient.keys(`my_orders_${req.user._id}_*`);
-if (keys.length) {
-  await redisClient.del(keys);
-}
+  const keys = await redisClient.keys(`my_orders_${req.user._id}_*`);
+  if (keys.length) {
+    await redisClient.del(keys);
+  }
 
   // ✅ RESPONSE
   res.status(201).json({
@@ -295,6 +321,7 @@ export const allMyOrders = handleAsyncError(async (req, res, next) => {
   const limit = Number(req.query.limit) || 10;
   const skip = (page - 1) * limit;
   const keyword = req.query.keyword ? req.query.keyword.trim() : "";
+  console.log("REQ USER:", req.user);
 
   // redisClient OPTIMIZATION: Use composite key including page, limit and keyword
   const cacheKey = `my_orders_${req.user._id}_p${page}_l${limit}_k${keyword}`;
@@ -329,17 +356,25 @@ export const allMyOrders = handleAsyncError(async (req, res, next) => {
   // 3. Execution
   const orders = await Order.find(query)
     .select(
-      "_id orderItems totalPrice orderStatus createdAt shippingInfo shippingPrice"
+      "_id user orderItems itemsPrice taxPrice discountPrice totalPrice orderStatus createdAt shippingInfo shippingPrice"
     )
+    .populate("user", "name email") // 🔥 ADD THIS
     .sort({ createdAt: -1 })
     .limit(limit)
     .skip(skip);
+
+  console.log("ORDER USER:", orders[0]?.user);
 
   const totalOrders = await Order.countDocuments(query);
 
   // 4. Clean Formatting for Pellisco UI
   const formattedOrders = orders.map((order) => ({
     _id: order._id,
+    user: order.user,
+
+    itemsPrice: order.itemsPrice, // ✅ ADD
+    taxPrice: order.taxPrice, // ✅ ADD
+    discountPrice: order.discountPrice, // ✅ ADD
     totalPrice: order.totalPrice,
     orderStatus: order.orderStatus,
     createdAt: order.createdAt,
