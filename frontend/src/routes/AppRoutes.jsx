@@ -26,6 +26,10 @@ import SalonPartner from "../features/user/SalonPatners";
 import CheckoutPage from "../pages/products/Checkout";
 import OrdersPage from "../pages/products/OrderPage";
 import OrderDetailsPage from "../pages/products/OrderDetailPage";
+import ShippingPolicy from "../pages/ShippingPolicy";
+import ReturnExchange from "../pages/ReturnExchange";
+import OurStory from "../pages/OurStory"
+import ContactUs from "../pages/ContactUs"
 
 const AppRoutes = () => {
   return (
@@ -68,6 +72,19 @@ const AppRoutes = () => {
 
         <Route path="settings" element={<UAccountPage />} />
       </Route>
+
+      <Route path="/shipping-policies" element={<ShippingPolicy />} />
+
+        <Route path="/return-exchange" element={<ReturnExchange />} />
+
+        <Route path="/contact-us" element={<ContactUs />} />
+
+        <Route path="/our-story" element={<OurStory />} />
+
+        {/* <Route path="/sustainability" element={<Sustainability />} />
+<Route path="/science" element={<Science />} />
+<Route path="/journal" element={<Journal />} />
+<Route path="/studies" element={<Studies />} /> */}
 
       {/* --- Protected Admin Routes --- */}
       <Route

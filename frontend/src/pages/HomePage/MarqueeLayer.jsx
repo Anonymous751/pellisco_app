@@ -1,4 +1,4 @@
-
+import { ShipWheel } from "lucide-react";
 
 const MarqueeLayer = () => {
   return (
@@ -8,20 +8,26 @@ const MarqueeLayer = () => {
         {[...Array(2)].map((_, i) => (
           <div key={i} className="flex items-center gap-12 pr-12">
 
-            {/* ITEM */}
-            <div className="flex items-center gap-3 text-white font-semibold tracking-[0.28em] uppercase drop-shadow-[0_2px_6px_rgba(0,0,0,0.25)]">
-              <img src="./images/pelliscoLogo.png" alt="logo" className="w-6 h-6 object-contain" />
+            {/* ITEM 1 */}
+            <div className="flex items-center gap-6 text-white font-semibold tracking-[0.28em] uppercase">
               <span className="text-4xl font-extrabold">Pellisco Professional</span>
+
+              {/* ROTATING SEPARATOR */}
+              <ShipWheel className="w-8 h-8 animate-spin-slow opacity-80" />
             </div>
 
-            <div className="flex items-center gap-3 text-white font-semibold tracking-[0.28em] uppercase opacity-90">
-              <img src="./images/pelliscoLogo.png" alt="logo" className="w-6 h-6 object-contain" />
+            {/* ITEM 2 */}
+            <div className="flex items-center gap-6 text-white font-semibold tracking-[0.28em] uppercase opacity-90">
               <span className="text-4xl font-extrabold">Luxury Skincare Science</span>
+
+              <ShipWheel className="w-8 h-8 animate-spin-slow opacity-80" />
             </div>
 
-            <div className="flex items-center gap-3 text-white font-semibold tracking-[0.28em] uppercase opacity-90">
-              <img src="./images/pelliscoLogo.png" alt="logo" className="w-6 h-6 object-contain" />
-              <spa className="text-4xl font-extrabold">Dermatologist Approved</spa>
+            {/* ITEM 3 */}
+            <div className="flex items-center gap-6 text-white font-semibold tracking-[0.28em] uppercase opacity-90">
+              <span className="text-4xl font-extrabold">Dermatologist Approved</span>
+
+              <ShipWheel className="w-8 h-8 animate-spin-slow opacity-80" />
             </div>
 
           </div>

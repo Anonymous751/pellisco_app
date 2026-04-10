@@ -66,6 +66,9 @@ html {
 }
 
 
+/* -------------------------------
+   MARQUEE ANIMATION
+--------------------------------*/
 @keyframes marquee {
   0% {
     transform: translateX(0%);
@@ -81,11 +84,52 @@ html {
   animation: marquee 25s linear infinite;
 }
 
+
+/* -------------------------------
+   SLOW ROTATING WHEEL (360°)
+--------------------------------*/
+@keyframes spin-slow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+
+/* -------------------------------
+   OPTIONAL: HOVER PAUSE (premium feel)
+--------------------------------*/
 .animate-marquee:hover {
   animation-play-state: paused;
 }
 
+.animate-spin-slow:hover {
+  animation-play-state: paused;
+}
+
+
+/* -------------------------------
+   FADE MASK (left + right fade)
+--------------------------------*/
 .mask-fade {
-  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
 }

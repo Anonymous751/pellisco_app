@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback  } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Search,
   User,
@@ -11,15 +11,17 @@ import {
   LogOut,
   LucideLayoutDashboard,
   Trash2,
-  } from "lucide-react";
-  import { NavLink, useNavigate } from "react-router-dom";
-  import { useSelector, useDispatch } from "react-redux";
-  import {
-    decrementQuantity,
-    incrementQuantity,
-    removeFromCart,
-  } from "../features/cart/cartSlice";
-  import Button from "../components/Button";
+  Heart,
+  Bell,
+} from "lucide-react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  decrementQuantity,
+  incrementQuantity,
+  removeFromCart,
+} from "../features/cart/cartSlice";
+import Button from "../components/Button";
 
 // 1. HOIST STATIC DATA: Move outside to prevent re-allocation on every render
 const NAV_LINKS = [
@@ -77,7 +79,6 @@ const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-
 
   const cartItems = useSelector((state) => state.cart.cartItems);
 
@@ -189,7 +190,11 @@ const Header = () => {
                 className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-white group-focus-within:text-white transition-colors duration-300"
                 size={24}
               />
+
+
+
             </div>
+
           </div>
         </div>
       </div>
@@ -252,12 +257,12 @@ const Header = () => {
                 <button
                   onClick={() => dispatch(removeFromCart(item._id))}
                   className="absolute right-0 top-6 p-2 text-red-500 hover:text-white
-                  bg-white hover:bg-red-500
-                  border border-red-200 hover:border-red-500
-                  rounded-full
-                  shadow-sm hover:shadow-md
-                  transition-all duration-200 ease-out
-                  active:scale-90 cursor-pointer"
+                    bg-white hover:bg-red-500
+                    border border-red-200 hover:border-red-500
+                    rounded-full
+                    shadow-sm hover:shadow-md
+                    transition-all duration-200 ease-out
+                    active:scale-90 cursor-pointer"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -301,13 +306,13 @@ const Header = () => {
                     <button
                       onClick={() => handleIncrease(item._id)}
                       className="w-7 h-7 flex items-center justify-center
-            border border-black/10 rounded-md
-            bg-white
-            hover:bg-secondary hover:text-white
-            active:scale-90
-            shadow-sm hover:shadow-md
-            transition-all duration-200 ease-out
-            cursor-pointer"
+              border border-black/10 rounded-md
+              bg-white
+              hover:bg-secondary hover:text-white
+              active:scale-90
+              shadow-sm hover:shadow-md
+              transition-all duration-200 ease-out
+              cursor-pointer"
                     >
                       +
                     </button>
@@ -327,12 +332,15 @@ const Header = () => {
               </span>
             </div>
 
-           <Button
-                label="Secure Checkout"
-                onClick={() => navigate("/checkout")}
-                className="h-12 text-[10px] tracking-[0.3em] w-full"
-                disabled={true}
-/>
+            <Button
+              label="Secure Checkout"
+              onClick={() => {
+                setIsCartOpen(false);
+                navigate("/checkout");
+              }}
+              className="h-12 text-[10px] tracking-[0.3em] w-full"
+              disabled={true}
+            />
             <p className="text-center mt-4 text-[9px] font-poppins text-primary/30 uppercase tracking-widest">
               Shipping & taxes calculated at checkout
             </p>
@@ -414,8 +422,10 @@ const Header = () => {
                                 size={12}
                                 className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-secondary z-10"
                               />
-                              <div className="absolute bottom-0 left-0 w-full h-1px bg-secondary/10" />
-                              <div className="absolute bottom-0 left-0 w-0 h-1px bg-secondary transition-all duration-500 ease-out group-hover:w-full" />
+                              {/* PREMIUM UNDERLINE */}
+                              <div className="absolute bottom-0 left-0 h-px w-full bg-secondary/20 overflow-hidden">
+                                <div className="h-full w-full bg-secondary scale-x-0 origin-left transition-transform duration-500 ease-out group-hover:scale-x-100" />
+                              </div>
                             </NavLink>
                           </li>
                         ))}
@@ -427,7 +437,10 @@ const Header = () => {
             ))}
           </nav>
 
+
+
           <div className="flex-1 flex items-center justify-end gap-5">
+
             <button
               onClick={() => setIsSearchOpen(true)}
               className="p-2 hover:text-secondary transition-colors cursor-pointer"
@@ -469,6 +482,7 @@ const Header = () => {
                   <User size={20} strokeWidth={1.2} />
                 </NavLink>
               )}
+
 
               {/* Profile Dropdown */}
               {isAuthenticated && isUserMenuOpen && (
@@ -530,7 +544,33 @@ const Header = () => {
                 {totalQuantity}
               </span>
             </button>
+             {/* ❤️ Wishlist */}
+  <div className="relative group cursor-pointer">
+    <Heart
+      className="text-primary/40 group-hover:text-danger transition-all duration-300"
+      size={20}
+    />
+
+    {/* Badge */}
+    <span className="absolute -top-2 -right-2 bg-danger text-white text-xs px-1.5 rounded-full">
+      2
+    </span>
+  </div>
+
+  {/* 🔔 Notifications */}
+  <div className="relative group cursor-pointer">
+    <Bell
+      className="text-primary/40 group-hover:text-secondary transition-all duration-300"
+      size={20  }
+    />
+
+    {/* Badge */}
+    <span className="absolute -top-2 -right-2 bg-secondary text-white text-xs px-1.5 rounded-full">
+      5
+    </span>
+  </div>
           </div>
+
         </div>
       </header>
     </>

@@ -10,9 +10,11 @@ const OrdersPage = () => {
 
   const [page, setPage] = useState(1);
 
-  const { orders = [], loading, totalPages } = useSelector(
-    (state) => state.orders
-  );
+  const {
+    orders = [],
+    loading,
+    totalPages,
+  } = useSelector((state) => state.orders);
 
   const { isAuthenticated } = useSelector((state) => state.auth);
 
@@ -108,9 +110,7 @@ const OrdersPage = () => {
                       Customer
                     </p>
                     <p className="font-medium">
-                      {order?.user?.name ||
-                        order?.user?.email ||
-                        "Guest"}
+                      {order?.user?.name || order?.user?.email || "Guest"}
                     </p>
                     <p className="text-xs text-black/50">
                       {order?.user?.email}
@@ -173,7 +173,7 @@ const OrdersPage = () => {
                       </p>
 
                       <p className="text-xs text-black/60">
-                        Tax: ₹{order?.taxPrice || 0}
+                        Tax (18%): ₹{order?.taxPrice || 0}
                       </p>
 
                       {order?.discountPrice > 0 && (
@@ -183,7 +183,7 @@ const OrdersPage = () => {
                       )}
 
                       <p className="text-lg font-semibold mt-1">
-                        Total: ₹{order?.totalPrice || 0}
+                        Total: ₹{Number(order?.totalPrice || 0).toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -228,9 +228,7 @@ const OrdersPage = () => {
           ))}
 
           <button
-            onClick={() =>
-              setPage((p) => Math.min(p + 1, totalPages || 1))
-            }
+            onClick={() => setPage((p) => Math.min(p + 1, totalPages || 1))}
             className="px-5 py-2 rounded-full border bg-white hover:bg-black hover:text-white transition"
           >
             Next

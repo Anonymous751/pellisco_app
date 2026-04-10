@@ -14,6 +14,7 @@ import {
   User,
   AlertCircle,
   RefreshCw,
+  Heart,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
@@ -36,6 +37,12 @@ const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const [isWishlisted, setIsWishlisted] = useState(false);
+
+  const handleWishlist = () => {
+  setIsWishlisted(prev => !prev);
+};
 
   // Redux State
   const { loading, error, product, success, isUpdated } = useSelector(
@@ -197,17 +204,38 @@ const ProductDetail = () => {
               ))}
             </div>
             <div className="flex-1 aspect-4/5 rounded-[2.5rem] overflow-hidden bg-white shadow-sm relative group border border-black/5">
-              <img
-                src={product?.images?.[selectedImg]?.url}
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                alt={product?.name}
-              />
-              <div className="absolute top-8 left-8">
-                <span className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest text-primary">
-                  {product?.stock > 0 ? "In Stock" : "Restocking"}
-                </span>
-              </div>
-            </div>
+
+  <img
+    src={product?.images?.[selectedImg]?.url}
+    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+    alt={product?.name}
+  />
+
+  {/* 🟢 Stock Badge */}
+  <div className="absolute top-8 left-8">
+    <span className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest text-primary">
+      {product?.stock > 0 ? "In Stock" : "Restocking"}
+    </span>
+  </div>
+
+  {/* ❤️ Wishlist Icon */}
+  <div className="absolute top-6 right-6">
+    <button
+  onClick={handleWishlist}
+  className="p-2 rounded-full bg-white/80 backdrop-blur-md hover:bg-white transition-all duration-300 shadow-sm"
+>
+  <Heart
+    size={20}
+    className={`transition-all duration-300 ${
+      isWishlisted
+        ? "text-danger fill-danger scale-110"
+        : "text-primary/60 hover:text-danger"
+    }`}
+  />
+</button>
+  </div>
+
+</div>
           </div>
 
           {/* RIGHT: PRODUCT INFO */}

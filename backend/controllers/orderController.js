@@ -125,7 +125,7 @@ export const createNewOrder = handleAsyncError(async (req, res, next) => {
     });
   }
 
-  const taxPrice = Number((itemsPrice * 0.05).toFixed(2));
+  const taxPrice = Number((itemsPrice * 0.18).toFixed(2));
   const shippingPrice = itemsPrice > 1000 ? 0 : 50;
 
   // ✅ FIX STARTS HERE
@@ -355,13 +355,13 @@ export const allMyOrders = handleAsyncError(async (req, res, next) => {
 
   // 3. Execution
   const orders = await Order.find(query)
-    .select(
-      "_id user orderItems itemsPrice taxPrice discountPrice totalPrice orderStatus createdAt shippingInfo shippingPrice"
-    )
-    .populate("user", "name email") // 🔥 ADD THIS
-    .sort({ createdAt: -1 })
-    .limit(limit)
-    .skip(skip);
+  .select(
+    "_id user orderItems itemsPrice taxPrice discountPrice totalPrice orderStatus createdAt shippingInfo shippingPrice"
+  )
+  .populate("user", "name email avatar") // ✅ FIXED
+  .sort({ createdAt: -1 })
+  .limit(limit)
+  .skip(skip);
 
   console.log("ORDER USER:", orders[0]?.user);
 

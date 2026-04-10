@@ -329,8 +329,8 @@ export const registerUser = handleAsyncError(async (req, res, next) => {
     url: "https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg",
   };
 
-  if (avatar && typeof avatar === "string" && avatar.length > 0) {
-    const result = await cloudinary.uploader.upload(avatar, {
+   if (req.file) {
+    const result = await cloudinary.uploader.upload(req.file.path, {
       folder: "pellisco/users",
       width: 250,
       height: 250,
@@ -345,6 +345,7 @@ export const registerUser = handleAsyncError(async (req, res, next) => {
       url: result.secure_url,
     };
   }
+
 
   // 4. User Creation
   const user = await User.create({
