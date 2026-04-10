@@ -109,6 +109,12 @@
       index: true
     },
 
+    isSubscribed: {
+  type: Boolean,
+  default: false,
+  index: true
+},
+
     // Token sent to email for account verification
     emailOTPVerificationToken: {
       type: String,

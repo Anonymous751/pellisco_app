@@ -1,5 +1,4 @@
-
-import { NavLink } from "react-router-dom"; // Added NavLink
+import { NavLink } from "react-router-dom";
 import {
   Instagram,
   Facebook,
@@ -7,9 +6,44 @@ import {
   Youtube,
   ArrowRight,
 } from "lucide-react";
+import { useState } from "react";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const handleSubscribe = async () => {
+    if (!email) return;
+
+    try {
+      setLoading(true);
+      setMessage("");
+
+      const res = await fetch("http://localhost:1551/api/v1/subscribe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setMessage("✅ Subscribed successfully!");
+        setEmail("");
+      } else {
+        setMessage(data.message || "Something went wrong");
+      }
+    } catch (err) {
+      setMessage("❌ Server error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Updated to include path-friendly keys
   const footerLinks = [
@@ -68,13 +102,28 @@ const Footer = () => {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="w-full bg-transparent border-b py-2 pr-10 text-sm font-poppins focus:outline-none transition-colors"
-                style={{ borderColor: "var(--color-mutedGreen)" }}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSubscribe()}
+                className="w-full bg-transparent border-b py-2 pr-10 text-sm font-poppins focus:outline-none"
               />
-              <button className="absolute right-0 top-1/2 -translate-y-1/2 transition-transform group-hover:translate-x-1">
-                <ArrowRight size={18} />
+
+              <button
+                onClick={handleSubscribe}
+                disabled={loading}
+                className="absolute right-0 top-1/2 -translate-y-1/2"
+              >
+                <button
+                  onClick={handleSubscribe}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 transition-all duration-300 hover:translate-x-1 hover:scale-110"
+                >
+                  <ArrowRight size={18} />
+                </button>
               </button>
             </div>
+
+            {/* MESSAGE */}
+            {message && <p className="text-xs mt-2 opacity-80">{message}</p>}
           </div>
 
           {/* 2, 3, 4. LINK COLUMNS */}
@@ -98,7 +147,7 @@ const Footer = () => {
                     >
                       {link.name}
                       {/* Smooth Underline Effect */}
-                      <span className="absolute left-0 bottom-0.5 w-0 h-[1px] bg-white transition-all duration-300 group-hover:w-full" />
+                      <span className="absolute left-0 bottom-0.5 w-0 h-1px bg-white transition-all duration-300 group-hover:w-full" />
                     </NavLink>
                   </li>
                 ))}
@@ -109,7 +158,7 @@ const Footer = () => {
 
         {/* --- DIVIDER --- */}
         <div
-          className="h-[1px] w-full mb-8 opacity-20"
+          className="h-px w-full mb-8 opacity-20"
           style={{ backgroundColor: "var(--color-mutedGreen)" }}
         />
 

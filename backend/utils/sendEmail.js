@@ -11,10 +11,11 @@ export const sendEmail = async (options) => {
     });
 
     const mailOptions = {
-      from: process.env.SMTP_EMAIL,
+      from: `"PELLISCO" <${process.env.SMTP_EMAIL}>`,
       to: options.email,
       subject: options.subject,
-      text: options.message
+      text: options.message,      // fallback
+      html: options.html          // ✅ NEW (important)
     };
 
     const info = await transporter.sendMail(mailOptions);

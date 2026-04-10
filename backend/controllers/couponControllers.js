@@ -1,23 +1,44 @@
 
-import APIFunctionality from "../utils/apiFunctionality.js"; 
+import APIFunctionality from "../utils/apiFunctionality.js";
 import HandleError from "../utils/handleError.js";
 
 import Coupon from "../models/couponModel.js";
 import handleAsyncError from "../middlewares/handleAsyncError.js";
+import subscriberModel from "../models/subscriberModel.js";
+import { sendEmail } from "../utils/sendEmail.js";
+import { couponTemplate } from "../utils/email/couponTemplate.js";
 
 // @desc    Create New Coupon (Admin)
 export const createCoupon = handleAsyncError(async (req, res, next) => {
-  // 1. Attach the admin ID as the creator
+  // 1. Attach admin
   req.body.createdBy = req.user.id;
 
-  // 2. Create the coupon (Mongoose handles the industry-level validations we added)
+  // 2. Create coupon
   const coupon = await Coupon.create(req.body);
 
+  // 3. Send response FIRST (important ⚡)
   res.status(201).json({
     success: true,
     message: "Promotion created successfully",
     coupon,
   });
+
+  // 4. Send emails in background (non-blocking 🔥)
+  try {
+    const subscribers = await subscriberModel.find({ isActive: true });
+
+    subscribers.forEach((sub) => {
+      sendEmail({
+        email: sub.email,
+        subject: "🎉 New Offer Just Dropped!",
+        html: couponTemplate(coupon),
+      });
+    });
+
+    console.log(`📧 Emails triggered for ${subscribers.length} users`);
+  } catch (err) {
+    console.log("Email sending failed:", err.message);
+  }
 });
 
 // @desc    Validate Coupon Code (Public/User Checkout)

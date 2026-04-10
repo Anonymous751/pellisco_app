@@ -190,11 +190,7 @@ const Header = () => {
                 className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 group-hover:text-white group-focus-within:text-white transition-colors duration-300"
                 size={24}
               />
-
-
-
             </div>
-
           </div>
         </div>
       </div>
@@ -257,12 +253,12 @@ const Header = () => {
                 <button
                   onClick={() => dispatch(removeFromCart(item._id))}
                   className="absolute right-0 top-6 p-2 text-red-500 hover:text-white
-                    bg-white hover:bg-red-500
-                    border border-red-200 hover:border-red-500
-                    rounded-full
-                    shadow-sm hover:shadow-md
-                    transition-all duration-200 ease-out
-                    active:scale-90 cursor-pointer"
+                  bg-white hover:bg-red-500
+                  border border-red-200 hover:border-red-500
+                  rounded-full
+                  shadow-sm hover:shadow-md
+                  transition-all duration-200 ease-out
+                  active:scale-90 cursor-pointer"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -306,13 +302,13 @@ const Header = () => {
                     <button
                       onClick={() => handleIncrease(item._id)}
                       className="w-7 h-7 flex items-center justify-center
-              border border-black/10 rounded-md
-              bg-white
-              hover:bg-secondary hover:text-white
-              active:scale-90
-              shadow-sm hover:shadow-md
-              transition-all duration-200 ease-out
-              cursor-pointer"
+            border border-black/10 rounded-md
+            bg-white
+            hover:bg-secondary hover:text-white
+            active:scale-90
+            shadow-sm hover:shadow-md
+            transition-all duration-200 ease-out
+            cursor-pointer"
                     >
                       +
                     </button>
@@ -339,7 +335,7 @@ const Header = () => {
                 navigate("/checkout");
               }}
               className="h-12 text-[10px] tracking-[0.3em] w-full"
-              disabled={true}
+              disabled={false}
             />
             <p className="text-center mt-4 text-[9px] font-poppins text-primary/30 uppercase tracking-widest">
               Shipping & taxes calculated at checkout
@@ -437,10 +433,7 @@ const Header = () => {
             ))}
           </nav>
 
-
-
           <div className="flex-1 flex items-center justify-end gap-5">
-
             <button
               onClick={() => setIsSearchOpen(true)}
               className="p-2 hover:text-secondary transition-colors cursor-pointer"
@@ -482,7 +475,6 @@ const Header = () => {
                   <User size={20} strokeWidth={1.2} />
                 </NavLink>
               )}
-
 
               {/* Profile Dropdown */}
               {isAuthenticated && isUserMenuOpen && (
@@ -544,33 +536,32 @@ const Header = () => {
                 {totalQuantity}
               </span>
             </button>
-             {/* ❤️ Wishlist */}
-  <div className="relative group cursor-pointer">
-    <Heart
-      className="text-primary/40 group-hover:text-danger transition-all duration-300"
-      size={20}
-    />
+            {/* ❤️ Wishlist */}
+            <div className="relative group cursor-pointer">
+              <Heart
+                className="text-primary/40 group-hover:text-danger transition-all duration-300"
+                size={20}
+              />
 
-    {/* Badge */}
-    <span className="absolute -top-2 -right-2 bg-danger text-white text-xs px-1.5 rounded-full">
-      2
-    </span>
-  </div>
+              {/* Badge */}
+              <span className="absolute -top-2 -right-2 bg-danger text-white text-xs px-1.5 rounded-full">
+                2
+              </span>
+            </div>
 
-  {/* 🔔 Notifications */}
-  <div className="relative group cursor-pointer">
-    <Bell
-      className="text-primary/40 group-hover:text-secondary transition-all duration-300"
-      size={20  }
-    />
+            {/* 🔔 Notifications */}
+            <div className="relative group cursor-pointer">
+              <Bell
+                className="text-primary/40 group-hover:text-secondary transition-all duration-300"
+                size={20}
+              />
 
-    {/* Badge */}
-    <span className="absolute -top-2 -right-2 bg-secondary text-white text-xs px-1.5 rounded-full">
-      5
-    </span>
-  </div>
+              {/* Badge */}
+              <span className="absolute -top-2 -right-2 bg-secondary text-white text-xs px-1.5 rounded-full">
+                5
+              </span>
+            </div>
           </div>
-
         </div>
       </header>
     </>

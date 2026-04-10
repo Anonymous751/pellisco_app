@@ -20,7 +20,7 @@ import securityLogsRoutes from "./routes/securityLogsRoutes.js";
 import systemRoutes from "./routes/systemRoutes.js";
 import { SystemLog } from "./models/systemLogModel.js";
 import settingsRoutes from "./routes/settingsRoutes.js"
-
+import subscriberRoutes from "./routes/subscriberRoutes.js"
 
 // ✅ Start cron
 startSessionCleanupJob();
@@ -97,6 +97,7 @@ app.use(sessionMiddleware);
 // ✅ 3. ROUTES
 // =========================
 app.use("/api/v1/storefront", storefrontRoutes);
+app.use("/api/v1", subscriberRoutes);
 app.use("/api/v1", userRoutes);
 app.use("/api/v1", productRoutes);
 app.use("/api/v1", orderRoutes);
@@ -109,6 +110,7 @@ app.use("/api/v1/system", systemRoutes);
 app.use("/api/v1/logistics/zones", zoneRoutes);
 // Mount settings API
 app.use("/api/v1/settings", settingsRoutes);
+
 
 
 // =========================
